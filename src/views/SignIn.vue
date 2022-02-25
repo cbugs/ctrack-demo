@@ -18,7 +18,9 @@
             <div class="mx-auto col-xl-4 col-lg-5 col-md-6 d-flex flex-column">
               <div class="mt-1 card card-plain">
                 <div class="pb-0 card-header text-start">
-                  <h3 class="font-weight-bolder text-info text-gradient">
+    
+                   <!-- <img style="width:100px;height:auto;" :src="logo" class="navbar-brand-img h-auto" alt="main_logo" /> -->
+                  <h3 class="font-weight-bolder text-primary text-gradient">
                     CTrack Demo Dashboard
                   </h3>
                   <p class="mb-0">Enter your email and password</p>
@@ -46,7 +48,7 @@
                         class="my-4 mb-2"
                         variant="gradient"
                         @click="login"
-                        color="info"
+                        color="primary"
                         fullWidth
                         >Sign in
                       </vsud-button>
@@ -95,7 +97,7 @@ import VsudInput from "@/components/VsudInput.vue";
 import VsudSwitch from "@/components/VsudSwitch.vue";
 import VsudButton from "@/components/VsudButton.vue";
 const body = document.getElementsByTagName("body")[0];
-
+import logo from "@/assets/img/logo-ct.png";
 export default {
   name: "signin",
   components: {
@@ -109,7 +111,8 @@ export default {
     return {
       submitting:false,
       username: "",
-      password: ""
+      password: "",
+      logo
     };
   },
   methods: {
@@ -128,7 +131,10 @@ export default {
       if(login.ok){
        let response = await login.json();
         if(response.ErrorCode == 0){
+          this.$store.state.user = response;
+          localStorage.setItem("user",JSON.stringify(response));
           console.log("UserInfo",response.UserId,response.SessionToken);
+          this.$router.push({name:'Dashboard'}) 
         } else {
           console.log("Wrong Login")
         }

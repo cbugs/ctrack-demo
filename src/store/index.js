@@ -7,6 +7,7 @@ export default createStore({
     showConfig: false,
     isTransparent: "",
     isRTL: false,
+    user: localStorage.getItem("user")!=null?JSON.parse(localStorage.getItem("user")):false,
     mcolor: "",
     isNavFixed: false,
     isAbsolute: false,

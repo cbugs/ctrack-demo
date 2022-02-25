@@ -1,0 +1,11 @@
+.navbar-vertical .navbar-nav > .nav-item .nav-link.active .icon{
+    background-image: linear-gradient(310deg, var(--primary) 0%, var(--primary) 100%);
+}
+
+.bg-gradient-primary {
+    background-image: linear-gradient(310deg,var(--primary) 0%, var(--primary-light) 100%);
+}
+
+.text-gradient.text-primary {
+    background-image: linear-gradient(310deg, var(--primary-light), var(--primary));
+}

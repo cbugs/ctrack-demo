@@ -66,7 +66,7 @@ export default {
     },
     percentageColor: {
       type: String,
-      default: "text-success",
+      default: "text-primary",
     },
     iconBackground: {
       type: String,

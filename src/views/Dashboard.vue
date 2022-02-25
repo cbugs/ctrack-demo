@@ -43,7 +43,38 @@
         ></card>
       </div>
     </div>
+
+
     <div class="row">
+
+      <div class="col-12">
+       <div class="card">
+          <div class="card-body p-1">
+            <div class="row">
+         <div class="col-12">
+ <GMapMap
+      :center="center"
+      :zoom="7"
+      map-type-id="terrain"
+      style="width: 100%; height: 300px"
+  >
+    <GMapCluster>
+      <GMapMarker
+          :key="index"
+          v-for="(m, index) in markers"
+          :position="m.position"
+          :clickable="true"
+          :draggable="true"
+          @click="center=m.position"
+      />
+    </GMapCluster>
+  </GMapMap>
+  </div></div></div></div>
+        </div>
+
+    </div>
+
+    <div class="row d-none">
       <div class="col-lg-7 mb-lg-0 mb-4">
         <div class="card">
           <div class="card-body p-3">
@@ -124,7 +155,7 @@
         </div>
       </div>
     </div>
-    <div class="mt-4 row">
+    <div class="mt-4 row d-none">
       <div class="mb-4 col-lg-5 mb-lg-0">
         <div class="card z-index-2">
           <div class="p-3 card-body">
@@ -140,7 +171,7 @@
         </div>
       </div>
     </div>
-    <div class="row my-4">
+    <div class="row my-4 d-none">
       <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
         <projects-card />
       </div>
@@ -160,13 +191,22 @@ import US from "../assets/img/icons/flags/US.png";
 import DE from "../assets/img/icons/flags/DE.png";
 import GB from "../assets/img/icons/flags/GB.png";
 import BR from "../assets/img/icons/flags/BR.png";
-
+// AIzaSyCGT3y9Ne5SlcF-H8nQethfc4zDDEEPgvo
 export default {
   name: "dashboard-default",
   data() {
     return {
+       center: {lat: 51.093048, lng: 6.842120},
+      markers: [
+        {
+          position: {
+            lat: 51.093048, lng: 6.842120
+          },
+        }
+        , // Along list of clusters
+      ],
       stats: {
-        iconBackground: "bg-gradient-success",
+        iconBackground: "bg-gradient-primary",
         money: {
           title: "Today's Money",
           value: "$53,000",
@@ -234,3 +274,11 @@ export default {
   },
 };
 </script>
+
+
+<style>
+  .vue-map{
+    height:400px!important;
+    border-radius:1rem;
+  }
+</style>

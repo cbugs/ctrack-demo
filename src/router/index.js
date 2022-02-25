@@ -13,11 +13,17 @@ const routes = [
     path: "/",
     name: "/",
     redirect: "/dashboard",
+       meta: {
+                requiresAuth: true
+            }
   },
   {
     path: "/dashboard",
     name: "Dashboard",
     component: Dashboard,
+    meta: {
+      requiresAuth: true
+  }
   },
   {
     path: "/tables",
@@ -45,14 +51,29 @@ const routes = [
     component: Rtl,
   },
   {
-    path: "/sign-in",
-    name: "Sign In",
+    path: "/login",
+    name: "Login",
     component: SignIn,
   },
   {
     path: "/sign-up",
     name: "Sign Up",
     component: SignUp,
+  },
+  {
+    path: "/vehicles",
+    name: "Vehicles",
+    component: Tables,
+  },
+  {
+    path: "/trips",
+    name: "Trips",
+    component: Tables,
+  },
+  {
+    path: "/logout",
+    name: "Logout",
+    component: Tables,
   },
 ];
 
