@@ -7,24 +7,24 @@
       <li class="nav-item">
         <sidenav-collapse navText="Dashboard" :to="{ name: 'Dashboard' }">
           <template v-slot:icon>
-            <icon name="dashboard" />
+            <i class="fa fa-tachometer"></i>
           </template>
         </sidenav-collapse>
       </li>
       <li class="nav-item">
         <sidenav-collapse navText="Vehicles" :to="{ name: 'Vehicles' }">
           <template v-slot:icon>
-            <icon name="truck" />
+            <i class="fa fa-car"></i>
           </template>
         </sidenav-collapse>
       </li>
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <sidenav-collapse navText="Trips" :to="{ name: 'Trips' }">
           <template v-slot:icon>
-            <icon name="map" />
+            <i class="fa fa-map-marker"></i>
           </template>
         </sidenav-collapse>
-      </li>
+      </li> -->
 
 
       <!-- <li class="mt-3 nav-item">
@@ -47,7 +47,7 @@
 
 </template>
 <script>
-import Icon from "@/components/Icon.vue";
+// import Icon from "@/components/Icon.vue";
 import SidenavCollapse from "./SidenavCollapse.vue";
 // import SidenavCard from "./SidenavCard.vue";
 
@@ -64,7 +64,7 @@ export default {
     };
   },
   components: {
-    Icon,
+    // Icon,
     SidenavCollapse,
     // SidenavCard,
   },
@@ -76,3 +76,17 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.nav-link i{
+  color:black;
+  font-size: 18px;
+  top: 0px;
+  opacity:1;
+}
+
+.nav-link.active i{
+  color:white;
+  opacity:1;
+}
+</style>

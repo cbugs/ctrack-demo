@@ -26,7 +26,7 @@
                   <p class="mb-0">Enter your email and password</p>
                 </div>
                 <div class="card-body">
-                  <form role="form" class="text-start">
+                  <form role="form" class="text-start" @submit="login">
                     <label>Username</label>
                     <vsud-input type="text"
                       :value="username"
@@ -47,7 +47,7 @@
                       <vsud-button
                         class="my-4 mb-2"
                         variant="gradient"
-                        @click="login"
+                        type="submit"
                         color="primary"
                         fullWidth
                         >Sign in
@@ -120,7 +120,7 @@ export default {
       this.submitting=true;
       e.preventDefault();
 
-      var login = await fetch("http://localhost/ctrack.php", {
+      var login = await fetch("http://ctrack.echohive.net/ctrack.php", {
         method: "post",
         body: JSON.stringify({
           url:`https://tstapi.ctrackonline.co.za/DCTTPIEngine/TPIEngine/REST/Membership/Login?username=${this.username}&password=${this.password}`,

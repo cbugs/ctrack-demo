@@ -21,6 +21,9 @@ router.beforeEach((to, from, next) => {
     } else {
         next() // does not require auth, make sure to always call next()!
     }
+    if(to.name == 'Login' && store.state.user){
+        next({name:'Dashboard'});
+    }
 })
 
 const appInstance = createApp(App);

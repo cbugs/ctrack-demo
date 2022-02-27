@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Dashboard from "@/views/Dashboard.vue";
+import Vehicles from "@/views/Vehicles.vue";
 import Tables from "@/views/Tables.vue";
 import Billing from "@/views/Billing.vue";
 import VirtualReality from "@/views/VirtualReality.vue";
@@ -63,7 +64,7 @@ const routes = [
   {
     path: "/vehicles",
     name: "Vehicles",
-    component: Tables,
+    component: Vehicles,
   },
   {
     path: "/trips",

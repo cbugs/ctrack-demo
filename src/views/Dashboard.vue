@@ -3,9 +3,8 @@
     <div class="row">
       <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
         <card
-          :title="stats.money.title"
-          :value="stats.money.value"
-          :percentage="stats.money.percentage"
+          :title="'Ingnition Off'"
+          :value="this.$store.state.ignitionoff"
           :iconClass="stats.money.iconClass"
           :iconBackground="stats.iconBackground"
           directionReverse
@@ -13,9 +12,8 @@
       </div>
       <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
         <card
-          :title="stats.users.title"
-          :value="stats.users.value"
-          :percentage="stats.users.percentage"
+          :title="'Driving'"
+          :value="this.$store.state.driving"
           :iconClass="stats.users.iconClass"
           :iconBackground="stats.iconBackground"
           directionReverse
@@ -23,20 +21,18 @@
       </div>
       <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
         <card
-          :title="stats.clients.title"
-          :value="stats.clients.value"
-          :percentage="stats.clients.percentage"
+          :title="'Average Speed'"
+          :value="Object.keys(this.$store.state.markers).length>0?Math.floor(this.$store.state.avgspeed/Object.keys(this.$store.state.markers).length):'0'"
           :iconClass="stats.clients.iconClass"
           :iconBackground="stats.iconBackground"
-          :percentageColor="stats.clients.percentageColor"
+          :percentageColor="'text-danger'"
           directionReverse
         ></card>
       </div>
       <div class="col-xl-3 col-sm-6 mb-xl-0">
         <card
-          :title="stats.sales.title"
-          :value="stats.sales.value"
-          :percentage="stats.sales.percentage"
+          :title="'Max Speed'"
+          :value="this.$store.state.maxspeed"
           :iconClass="stats.sales.iconClass"
           :iconBackground="stats.iconBackground"
           directionReverse
@@ -53,20 +49,33 @@
             <div class="row">
          <div class="col-12">
  <GMapMap
-      :center="center"
-      :zoom="7"
+ :center="center"
+      :zoom="4"
       map-type-id="terrain"
       style="width: 100%; height: 300px"
   >
-    <GMapCluster>
+    <GMapCluster :styles="clusterIcon">
       <GMapMarker
           :key="index"
-          v-for="(m, index) in markers"
+          v-for="(m, index) in this.$store.state.markers"
           :position="m.position"
           :clickable="true"
           :draggable="true"
-          @click="center=m.position"
-      />
+         @click="openMarker(m.info.NodeId,true)" 
+      >
+
+           <GMapInfoWindow
+          :closeclick="true"
+          @closeclick="openMarker(m.info.NodeId,false)"
+          :opened="openedMarkerID.indexOf(m.info.NodeId)>=0"
+      >
+      <div>Node id: {{ m.info.NodeId }} </div>
+       <div>Date: {{ m.info.EventTimeUTC }} </div>
+        <div>Driver id: {{ m.info.DriverId }} </div>
+         <div>Status: {{ m.info.StatusText }} </div>
+      </GMapInfoWindow>
+
+      </GMapMarker>
     </GMapCluster>
   </GMapMap>
   </div></div></div></div>
@@ -196,41 +205,73 @@ export default {
   name: "dashboard-default",
   data() {
     return {
-       center: {lat: 51.093048, lng: 6.842120},
-      markers: [
-        {
-          position: {
-            lat: 51.093048, lng: 6.842120
-          },
-        }
-        , // Along list of clusters
-      ],
+       openedMarkerID: [],
+  //      ignitionoff:0,
+  //      driving:0,
+  //       avgspeed:0,
+  //     maxspeed:0,
+  // deliveryTag:0,
+  continueSearch:true,
+    //  Cignitionoff:0,
+    //    Cdriving:0,
+    //     Cavgspeed:0,
+    //   Cmaxspeed:0,
+
+      loaded:false,
+       center: {lat: -33.918861, lng: 18.423300},
+  
+        clusterIcon:[{
+      height: 53,
+      url: "https://raw.githubusercontent.com/googlearchive/js-marker-clusterer/gh-pages/images/m1.png",
+      width: 53
+    },
+    {
+      height: 56,
+      url: "https://raw.githubusercontent.com/googlearchive/js-marker-clusterer/gh-pages/images/m2.png",
+      width: 56
+    },
+    {
+      height: 66,
+      url: "https://raw.githubusercontent.com/googlearchive/js-marker-clusterer/gh-pages/images/m3.png",
+      width: 66
+    },
+    {
+      height: 78,
+      url: "https://raw.githubusercontent.com/googlearchive/js-marker-clusterer/gh-pages/images/m4.png",
+      width: 78
+    },
+    {
+      height: 90,
+      url: "https://raw.githubusercontent.com/googlearchive/js-marker-clusterer/gh-pages/images/m5.png",
+      width: 90
+    }
+  ],
       stats: {
         iconBackground: "bg-gradient-primary",
         money: {
           title: "Today's Money",
           value: "$53,000",
           percentage: "+55%",
-          iconClass: "ni ni-money-coins",
+          iconClass: "fa fa-toggle-off",
         },
         users: {
           title: "Today's Users",
           value: "2,300",
           percentage: "+3%",
-          iconClass: "ni ni-world",
+          iconClass: "fa fa-car",
         },
         clients: {
           title: "New Clients",
           value: "+3,462",
           percentage: "-2%",
           iconClass: "ni ni-paper-diploma",
-          percentageColor: "text-danger",
+          percentageColor: "fa fa-fast-forward",
         },
         sales: {
           title: "Sales",
           value: "$103,430",
           percentage: "+5%",
-          iconClass: "ni ni-cart",
+          iconClass: "fa fa-flash",
         },
       },
       sales: {
@@ -272,6 +313,90 @@ export default {
     ProjectsCard,
     OrdersCard,
   },
+  methods:{
+      openMarker(id,add) {
+        if(add){
+          this.openedMarkerID.push(id);
+        } else {
+          this.openedMarkerID = this.openedMarkerID.filter(item => item !== id)
+          // this.openedMarkerID.splice(this.openedMarkerID.indexOf(id),1);
+        }
+        console.log(this.openedMarkerID)
+    },
+    async getPositions(){
+     
+           var c_positions = await fetch("http://ctrack.echohive.net/ctrack.php", {
+        method: "post",
+        body: JSON.stringify({
+          url:`https://tstapi.ctrackonline.co.za/DCTTPIEngine/TPIEngine/REST/Queues/${this.$store.state.user.SessionToken}/GetPositions?autoack=false&limit=50`,
+          method: 'get'
+        }),
+      });
+
+      if(c_positions.ok){
+        let response = await c_positions.json();
+       
+        if(response.ErrorCode > 0){
+          this.$store.state.user = false;
+      localStorage.removeItem("user");
+      this.$router.push({name:'Login'}) 
+        }
+
+       let positions = response.VehiclePositionsDetailed;
+       for(var i=0;i<positions.length;i++){
+          if(this.$store.state.deliveryTag > positions[i].DeliveryTag && i==0){
+            // this.continueSearch=false;
+          }
+
+         if(positions[i].StatusText == "Driving"){
+           this.$store.state.driving  = this.$store.state.driving+1;
+         }
+
+        if(positions[i].StatusText == "Ignition off"){
+           this.$store.state.ignitionoff  = this.$store.state.ignitionoff+1;
+         }
+
+         if(this.$store.state.maxspeed < positions[i].StreetMaxSpeed){
+           this.$store.state.maxspeed = positions[i].StreetMaxSpeed;
+         }
+
+if(this.$store.state.markers[positions[i].NodeId] === undefined){
+if(positions[i].StreetMaxSpeed !== undefined){
+  this.$store.state.avgspeed = this.$store.state.avgspeed+positions[i].StreetMaxSpeed;
+
+}
+}
+
+         this.$store.state.markers[positions[i].NodeId] = 
+{
+          info:positions[i],
+          position: {
+            lat: positions[i].Latitude, lng: positions[i].Longitude
+          },
+        }
+         ;
+  this.$store.state.deliveryTag = positions[i].DeliveryTag;
+       }
+// console.log("marker",this.markers)
+       this.loaded=true;
+       if(this.continueSearch){
+         setTimeout(()=>{
+           this.getPositions();
+         },5000)
+       }
+        // if(response.ErrorCode == 0){
+        
+        // } else {
+        
+        // }
+      }
+    }
+  },
+  created(){
+    
+      this.getPositions();
+
+  }
 };
 </script>
 
