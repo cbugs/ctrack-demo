@@ -10,6 +10,8 @@ export default createStore({
     user: localStorage.getItem("user")!=null?JSON.parse(localStorage.getItem("user")):false,
     mcolor: "",
     markers:{},
+    markersData: localStorage.getItem("markersData")!=null?JSON.parse(localStorage.getItem("markersData")):false,
+    vehiclesData: localStorage.getItem("vehiclesData")!=null?JSON.parse(localStorage.getItem("vehiclesData")):false,
     ignitionoff:0,
     driving:0,
      avgspeed:0,
@@ -26,6 +28,18 @@ export default createStore({
   mutations: {
     toggleConfigurator(state) {
       state.showConfig = !state.showConfig;
+    },
+    setMarkers(state,payload){
+      console.log("BEFORE",state.markers,payload)
+      state.markers = payload;
+
+      state.ignitionoff=0;
+      state.driving=0;
+      state.avgspeed=0;
+      state.maxspeed=0;
+      state.deliveryTag=0;
+
+      console.log("AFTER",state.markers)
     },
     navbarMinimize(state) {
       const sidenav_show = document.querySelector(".g-sidenav-show");
@@ -59,6 +73,9 @@ export default createStore({
   actions: {
     toggleSidebarColor({ commit }, payload) {
       commit("sidebarType", payload);
+    },
+    setMarkers({ commit }, payload) {
+      commit("setMarkers", payload);
     },
   },
   getters: {},

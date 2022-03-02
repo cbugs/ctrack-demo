@@ -47,7 +47,7 @@
               <span v-else class="d-sm-inline d-none">Logout </span>
             </router-link>
           </li>
-          <!-- <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+         <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
             <a
               href="#"
               @click="toggleSidebar"
@@ -60,7 +60,7 @@
                 <i class="sidenav-toggler-line"></i>
               </div>
             </a>
-          </li> -->
+          </li> 
           <!-- <li class="px-3 nav-item d-flex align-items-center">
             <a
               class="p-0 nav-link"

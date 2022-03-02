@@ -1,19 +1,65 @@
 <template>
-  <div class="card mb-4">
+<div>
+ <div v-if="!loaded" class="text-center"><img :src="loader" class="w-10f0 m-auto text-center"/></div>
+
+
+  <div v-if="loaded" class="card mb-4">
     <div class="card-header pb-0 ">
       <h6>Vehicles</h6>
       <div class="row d-none">
-        <div class="col-4">
+        <div class="col-md-4 col-12">
           <div 
           class="text-secondary text-xxs 
           font-weight-bolder opacity-7">Search Text:</div>
         </div>
+
+
+ 
                    
       </div>
       <div class="row">
-        <div class="col-4">
+
+
+                     <div class="col-md-12 col-12">
+        <div>Companies:</div>
+
+
+  <Multiselect
+  @select="getVehicles"
+  @deselect="getVehicles"
+  @clear="getVehiclesClear" 
+    v-model="company"
+    mode="tags"
+    placeholder="Select companies"
+    track-by="name"
+    label="name"
+    :close-on-select="false"
+    :search="true"
+    :options="companies"
+  >
+    <template v-slot:tag="{ option, handleTagRemove, disabled }">
+      <div class="multiselect-tag is-user">
+        <img :src="option.icon">
+        {{ option.name }}
+        <span
+           v-if="!disabled"
+           class="multiselect-tag-remove"
+           @mousedown.prevent="handleTagRemove(option, $event)"
+        >
+          <span class="multiselect-tag-remove-icon"></span>
+        </span>
+      </div>
+    </template>
+ </Multiselect>
+
+
+</div>
+
+        <div class="col-md-12 col-12 mt-3">
           <input type="text" v-model="search" class="form-control " placeholder="Search Text" />
         </div>
+
+
                
       </div>
     </div>
@@ -187,6 +233,8 @@
       </div>
     </div>
   </div>
+  </div>
+
 </template>
 
 <script>
@@ -198,6 +246,8 @@ import img3 from "../../assets/img/team-4.jpg";
 import img4 from "../../assets/img/team-3.jpg";
 import img5 from "../../assets/img/team-2.jpg";
 import img6 from "../../assets/img/team-4.jpg";
+import loader from "@/assets/img/loader.gif";
+import Multiselect from '@vueform/multiselect';
 
 export default {
   name: "vehicles-table",
@@ -209,6 +259,24 @@ export default {
       img4,
       img5,
       img6,
+      loader,
+                     company: ['th','un','gr','cr','zi','ts'],
+               companyColors:{
+    'th': '005f73',
+    'un': 'ee9b00',
+    'gr': 'ae2012',
+    'cr': 'fb8500',
+    'zi': 'f72585',
+    'ts': '2d6a4f'
+  },
+        companies: [
+          { value: 'th', name: 'TH tankers', icon: 'https://dummyimage.com/16x16/005f73/fff&text=TH' },
+          { value: 'un', name: 'Unitrans', icon: 'https://dummyimage.com/16x16/ee9b00/fff&text=UN' },
+          { value: 'gr', name: 'Grindrod', icon: 'https://dummyimage.com/16x16/ae2012/fff&text=GR' },
+          { value: 'cr', name: 'Cross Roads', icon: 'https://dummyimage.com/16x16/fb8500/fff&text=CR' },
+          { value: 'zi', name: 'Zimbulk Tankers', icon: 'https://dummyimage.com/16x16/f72585/fff&text=ZI' },
+          { value: 'ts', name: 'Tswana Fuel', icon: 'https://dummyimage.com/16x16/2d6a4f/fff&text=TS' }
+        ],
       pageNumber:1,
       pageLimit:10,
       search:"",
@@ -363,38 +431,71 @@ this.paths = [];   this.tripMarkers = [];
       }
       // this.center=  {lat: 25.774, lng: -80.19};
     },
+    async getVehiclesClear(){
+      this.company = [];
+      this.getVehicles();
+    },
     async getVehicles(){
-      console.log("text")
-           var c_vehicles = await fetch("http://ctrack.echohive.net/ctrack.php", {
+      
+         let response = false;
+           var c_vehicles = {'ok':false};
+      if(!this.$store.state.vehiclesData){
+
+           c_vehicles = await fetch("http://ctrack.echohive.net/ctrack.php", {
         method: "post",
         body: JSON.stringify({
           url:`https://tstapi.ctrackonline.co.za/DCTTPIEngine/TPIEngine/REST/Vehicles/${this.$store.state.user.SessionToken}/GetVehicles`,
-          method: 'get'
-        }),
-      });
+            method: 'get'
+          }),
+        });
+      }else {
+        response = this.$store.state.vehiclesData;
+        c_vehicles = {'ok':true};
+      }
+
+
 
       if(c_vehicles.ok){
-        let response = await c_vehicles.json();
-       
+          if(!response){
+          response = await c_vehicles.json();
+
+
+
         if(response.ErrorCode > 0){
           this.$store.state.user = false;
       localStorage.removeItem("user");
       this.$router.push({name:'Login'}) 
         }
 
+        
+        let positionsB = response.VehicleList;
+        let arrB = Object.keys(this.companies);
+        for(var iB=0;iB<positionsB.length;iB++){
+          response.VehicleList[iB].Company = this.companies[arrB[Math.floor(Math.random() * arrB.length)]].value;
+        }
+
+        }
+               localStorage.setItem("vehiclesData",JSON.stringify(response));
+       this.$store.state.vehiclesData = response;
+
        let vehicles = response.VehicleList;
+       this.vehicles = [];
        for(var i=0;i<vehicles.length;i++){
+               if(this.company.indexOf(vehicles[i].Company) < 0 ){
+           continue;
+         }
          this.vehicles.push(vehicles[i]);
 
        }
 
-       this.loaded=true;
+       
         // if(response.ErrorCode == 0){
         
         // } else {
         
         // }
       }
+      this.loaded=true;
     },
     setPageNumber(num){
       this.pageNumber = num;
@@ -406,6 +507,7 @@ this.paths = [];   this.tripMarkers = [];
   components: {
     // VsudAvatar,
     // VsudBadge,
+    Multiselect
   },
   computed:{
     filteredVehicles:function(){

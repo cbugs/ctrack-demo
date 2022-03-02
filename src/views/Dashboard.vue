@@ -1,5 +1,8 @@
 <template>
-  <div class="py-4 container-fluid">
+<div>
+
+  <div v-if="!loaded" class="text-center"><img :src="loader" class="w-10f0 m-auto text-center"/></div>
+ <div v-if="loaded" class="py-4 container-fluid">
     <div class="row">
       <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
         <card
@@ -40,6 +43,43 @@
       </div>
     </div>
 
+<div class="row mb-3">
+
+      <div class="col-12">
+        <div>Companies:</div>
+
+
+  <Multiselect
+  @select="getPositions"
+  @deselect="getPositions"
+  @clear="getPositionsClear" 
+    v-model="company"
+    mode="tags"
+    placeholder="Select companies"
+    track-by="name"
+    label="name"
+    :close-on-select="false"
+    :search="true"
+    :options="companies"
+  >
+    <template v-slot:tag="{ option, handleTagRemove, disabled }">
+      <div class="multiselect-tag is-user">
+        <img :src="option.icon">
+        {{ option.name }}
+        <span
+           v-if="!disabled"
+           class="multiselect-tag-remove"
+           @mousedown.prevent="handleTagRemove(option, $event)"
+        >
+          <span class="multiselect-tag-remove-icon"></span>
+        </span>
+      </div>
+    </template>
+ </Multiselect>
+
+
+</div>
+</div>
 
     <div class="row">
 
@@ -60,6 +100,7 @@
           v-for="(m, index) in this.$store.state.markers"
           :position="m.position"
           :clickable="true"
+          :icon="'https://dummyimage.com/22x22/'+companyColors[m.info.Company]+'/fff&text='+m.info.Company.toUpperCase()"
           :draggable="true"
          @click="openMarker(m.info.NodeId,true)" 
       >
@@ -189,7 +230,37 @@
       </div>
     </div>
   </div>
+</div>
+ 
 </template>
+
+<style>
+  .multiselect-tag.is-user {
+    padding: 5px 8px;
+    border-radius: 22px;
+    background: #35495e;
+    margin: 3px 3px 8px;
+  }
+
+  .multiselect-tag.is-user img {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    border: 1px solid #fff;
+  }
+
+  .multiselect-tag.is-user i:before {
+    color: #ffffff;
+    border-radius: 50%;;
+  }
+
+  .user-image {
+    margin: 0 6px 0 0;
+    border-radius: 50%;
+    height: 22px;
+  }
+</style>
+
 <script>
 import Card from "@/examples/Cards/Card.vue";
 import ActiveUsersChart from "@/examples/Charts/ActiveUsersChart.vue";
@@ -200,12 +271,35 @@ import US from "../assets/img/icons/flags/US.png";
 import DE from "../assets/img/icons/flags/DE.png";
 import GB from "../assets/img/icons/flags/GB.png";
 import BR from "../assets/img/icons/flags/BR.png";
+import { mapActions } from "vuex";
+import Multiselect from '@vueform/multiselect';
+import loader from "@/assets/img/loader.gif";
+
 // AIzaSyCGT3y9Ne5SlcF-H8nQethfc4zDDEEPgvo
 export default {
   name: "dashboard-default",
+
   data() {
     return {
+      loader,
        openedMarkerID: [],
+               company: ['th','un','gr','cr','zi','ts'],
+               companyColors:{
+    'th': '005f73',
+    'un': 'ee9b00',
+    'gr': 'ae2012',
+    'cr': 'fb8500',
+    'zi': 'f72585',
+    'ts': '2d6a4f'
+  },
+        companies: [
+          { value: 'th', name: 'TH tankers', icon: 'https://dummyimage.com/16x16/005f73/fff&text=TH' },
+          { value: 'un', name: 'Unitrans', icon: 'https://dummyimage.com/16x16/ee9b00/fff&text=UN' },
+          { value: 'gr', name: 'Grindrod', icon: 'https://dummyimage.com/16x16/ae2012/fff&text=GR' },
+          { value: 'cr', name: 'Cross Roads', icon: 'https://dummyimage.com/16x16/fb8500/fff&text=CR' },
+          { value: 'zi', name: 'Zimbulk Tankers', icon: 'https://dummyimage.com/16x16/f72585/fff&text=ZI' },
+          { value: 'ts', name: 'Tswana Fuel', icon: 'https://dummyimage.com/16x16/2d6a4f/fff&text=TS' }
+        ],
   //      ignitionoff:0,
   //      driving:0,
   //       avgspeed:0,
@@ -311,9 +405,11 @@ export default {
     ActiveUsersChart,
     GradientLineChart,
     ProjectsCard,
+    Multiselect,
     OrdersCard,
   },
   methods:{
+    ...mapActions(["setMarkers"]),
       openMarker(id,add) {
         if(add){
           this.openedMarkerID.push(id);
@@ -323,27 +419,58 @@ export default {
         }
         console.log(this.openedMarkerID)
     },
+    async getPositionsClear(){
+      this.company = [];
+      this.getPositions();
+    },
     async getPositions(){
      
-           var c_positions = await fetch("http://ctrack.echohive.net/ctrack.php", {
+      this.setMarkers({});
+
+      let response = false;
+      var c_positions = {'ok':false};
+      if(!this.$store.state.markersData){
+          c_positions = await fetch("http://ctrack.echohive.net/ctrack.php", {
         method: "post",
         body: JSON.stringify({
-          url:`https://tstapi.ctrackonline.co.za/DCTTPIEngine/TPIEngine/REST/Queues/${this.$store.state.user.SessionToken}/GetPositions?autoack=false&limit=50`,
+          url:`https://tstapi.ctrackonline.co.za/DCTTPIEngine/TPIEngine/REST/Queues/${this.$store.state.user.SessionToken}/GetPositions?autoack=false&limit=500`,
           method: 'get'
         }),
-      });
+        });
+      } else {
+        response = this.$store.state.markersData;
+        c_positions = {'ok':true};
+      }
 
       if(c_positions.ok){
-        let response = await c_positions.json();
-       
+        // this.$store.state.markers = {};
+        if(!response){
+          response = await c_positions.json();
+
         if(response.ErrorCode > 0){
           this.$store.state.user = false;
       localStorage.removeItem("user");
       this.$router.push({name:'Login'}) 
         }
 
+        let positionsB = response.VehiclePositionsDetailed;
+        let arrB = Object.keys(this.companies);
+        for(var iB=0;iB<positionsB.length;iB++){
+          response.VehiclePositionsDetailed[iB].Company = this.companies[arrB[Math.floor(Math.random() * arrB.length)]].value;
+        }
+
+        }
+        localStorage.setItem("markersData",JSON.stringify(response));
+       this.$store.state.markersData = response;
+
+
        let positions = response.VehiclePositionsDetailed;
        for(var i=0;i<positions.length;i++){
+         if(this.company.indexOf(positions[i].Company) < 0 ){
+           continue;
+         }
+        // console.log("COMPANY",this.company)
+
           if(this.$store.state.deliveryTag > positions[i].DeliveryTag && i==0){
             // this.continueSearch=false;
           }
@@ -378,11 +505,11 @@ if(positions[i].StreetMaxSpeed !== undefined){
   this.$store.state.deliveryTag = positions[i].DeliveryTag;
        }
 // console.log("marker",this.markers)
-       this.loaded=true;
+       
        if(this.continueSearch){
-         setTimeout(()=>{
-           this.getPositions();
-         },5000)
+        //  setTimeout(()=>{
+        //    this.getPositions();
+        //  },5000)
        }
         // if(response.ErrorCode == 0){
         
@@ -390,6 +517,7 @@ if(positions[i].StreetMaxSpeed !== undefined){
         
         // }
       }
+    this.loaded=true;
     }
   },
   created(){
